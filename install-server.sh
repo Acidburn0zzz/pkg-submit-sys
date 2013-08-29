@@ -60,8 +60,8 @@ setup_home() {
     admin
   do
     submsg "${repo_home}/${i}"
-    mkdir -p "${repo_home}/${i}" \
-    || die "failed to create home directory structure"
+    install -dm755 -o "${repo_uid}" -g "${repo_gid}" "${repo_home}/${i}" \\
+      || die "failed to create home directory structure"
   done
 }
 
@@ -69,7 +69,7 @@ copy_bin() {
   msg "installing scripts"
   for i in bin/*; do
     submsg "${repo_home}/${i}"
-    install -m755 "${i}" "${repo_home}/bin/" \
+    install -m755 -o "${repo_uid}" -g "${repo_gid}""${i}" "${repo_home}/bin/" \
       || die "failed to copy scripts"
   done
 }
@@ -90,6 +90,8 @@ config_home() {
   msg "copying key files..."
   cat "${admin_keys[@]}" > "${repo_home}/.ssh/admin_keys.pub" \
     || die "failed to create .ssh/admin_keys.pub"
+
+  chown -R "${repo_uid}:${repo_gid}" "${repo_home}/.ssh"
 }
 
 check_config
