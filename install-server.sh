@@ -2,12 +2,12 @@
 
 msg() {
   local mesg="$1"; shift
-  printf "\033[1;32***\033[0;0m ${mesg}\n" "$@"
+  printf "\033[1;32m***\033[0;0m ${mesg}\n" "$@"
 }
 
 submsg() {
   local mesg="$1"; shift
-  printf "\033[1;34  ->\033[0;0m ${mesg}\n" "$@"
+  printf "\033[1;34m  ->\033[0;0m ${mesg}\n" "$@"
 }
 
 die() {
