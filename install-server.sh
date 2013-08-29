@@ -9,9 +9,12 @@ die() {
 source config.sh || die "failed to read config"
 
 setup_user() {
-  repo_uid=$(id -u "${repo_user}")
+  repo_uid=$(id -u "${repo_user}" 2>/dev/null)
   if (( $? != 0 )); then
-    pw useradd "${repo_user}" || die "failed to create user ${repo_user}"
+    pw useradd "${repo_user}" -m || die "failed to create user ${repo_user}"
+    for i in "${repo_addgroups[@]}"; do
+      pw groupmod "${i}" -m "${repo_user}" || die "failed to add ${repo_user} to group ${i}"
+    done
     repo_uid=$(id -u "${repo_user}")
     if (( $? != 0 )); then die "failed to retrieve user's uid"; fi
   fi
