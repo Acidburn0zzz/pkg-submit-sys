@@ -20,7 +20,7 @@ setup_user() {
   fi
   repo_gid=$(id -g "${repo_user}")
   if (( $? != 0 )); then die "failed to retrieve user's gid"; fi
-  repo_home=$(echo ~${repo_user})
+  repo_home=$(eval "echo ~${repo_user}")
   if (( $? != 0 )); then die "failed to retrieve user's home directory"; fi
 
   [ -d "${repo_home}" ] || die "home does not exist: ${repo_home}"
