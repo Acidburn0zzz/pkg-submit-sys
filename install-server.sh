@@ -18,6 +18,17 @@ die() {
 
 source config.sh || die "failed to read config"
 
+check_config() {
+  msg "checking for key files..."
+  for i in "${admin_keys[@]}"; do
+    if [ -e "${i}" ]; then
+      submsg "found ssh key: ${i}"
+    else
+      die "key not found: ${i}"
+    fi
+  done
+}
+
 setup_user() {
   repo_uid=$(id -u "${repo_user}" 2>/dev/null)
   if (( $? != 0 )); then
@@ -74,6 +85,14 @@ setup_admin_repo() {
     || die "failed to setup post-receive git hook"
 }
 
+config_home() {
+  msg "copying key files..."
+  cat "${admin_keys[@]}" > "${repo_home}/.ssh/admin_keys.pub" \
+    || die "failed to create .ssh/admin_keys.pub"
+}
+
+check_config
 setup_user
 setup_home
 setup_admin_repo
+config_home

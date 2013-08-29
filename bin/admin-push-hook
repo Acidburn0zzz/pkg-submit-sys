@@ -9,6 +9,7 @@
 # merge the [testing] repository to the rest
 
 authfile="${HOME}/.ssh/authorized_keys"
+basefile="${HOME}/.ssh/admin_keys.pub"
 newfile="${authfile}.new"
 
 access="no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty"
@@ -38,7 +39,7 @@ add_packager() {
     "$user" \
     "$access" \
     "$key" \
-    >> "${HOME}/.ssh/authorized_keys.new" >&3
+    >&3
 }
 
 add_core() {
@@ -46,21 +47,21 @@ add_core() {
   add_packager "$@"
 }
 
-if [ -e "${newfile}" ]; then
-  rm "${newfile}" || die "failed to remove previous .new file"
-fi
+buildfile() {
+  exec 3>"${newfile}"
+  cat "${basefile}" >&3
 
-# open the file only once in case someone moves it while we are running
-exec 3>"${newfile}"
+  while read line; do
+    add_packager "${line}"
+  done < <$(cat_file packagers)
 
-while read line; do
-  add_packager "${line}"
-done < <$(cat_file packagers)
+  while read line; do
+    add_core "${line}"
+  done < <$(cat_file core)
 
-while read line; do
-  add_core "${line}"
-done < <$(cat_file core)
+  exec 3>&-
+}
 
-exec 3>&-
+flock -x "${newfile}" buildfile
 
 mv "${newfile}" "${authfile}" || die "failed to replace authorization file"
