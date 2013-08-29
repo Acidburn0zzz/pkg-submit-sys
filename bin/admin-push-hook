@@ -23,7 +23,7 @@ die() {
 cat_file() {
   local file="$1"
   local cmd="$2"
-  local blob=$(git ls-tree -r HEAD | grep -E "blob [a-f0-9]{40}\s*${file}\$")
+  local blob=$(git ls-tree -r HEAD | grep -E "blob [a-f0-9]{40}\s*${file}\$" | awk '{print $3}')
   if (( $? == 0 )); then
     git cat-file blob "${blob}"
   fi
