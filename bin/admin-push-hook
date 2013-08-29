@@ -53,11 +53,11 @@ buildfile() {
 
   while read line; do
     add_packager "${line}"
-  done < <$(cat_file packagers)
+  done < <(cat_file packagers)
 
   while read line; do
     add_core "${line}"
-  done < <$(cat_file core)
+  done < <(cat_file core)
 
   exec 3>&-
 }
