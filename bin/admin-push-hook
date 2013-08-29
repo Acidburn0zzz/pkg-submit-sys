@@ -62,6 +62,10 @@ buildfile() {
   exec 3>&-
 }
 
-flock -x "${newfile}" buildfile
-
-mv "${newfile}" "${authfile}" || die "failed to replace authorization file"
+case "$1" in
+  buildfile) buildfile ;;
+  *)
+    flock -x "${newfile}" "$0" buildfile
+    mv "${newfile}" "${authfile}" || die "failed to replace authorization file"
+    ;;
+esac
