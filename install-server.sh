@@ -82,7 +82,10 @@ setup_admin_repo() {
     || die "failed to initialize admin git repository"
   chown -R "${repo_uid}:${repo_gid}" admin.git
   submsg "setting up git push hook"
-  ln -svf "${repo_home}/bin/admin-push-hook" "admin.git/hooks/post-receive" \
+  rm -f "admin.git/hooks/"{post-receive,post-update}
+  #ln -svf "${repo_home}/bin/admin-push-hook" "admin.git/hooks/post-receive" \
+  #  || die "failed to setup post-receive git hook"
+  ln -svf "${repo_home}/bin/admin-push-hook" "admin.git/hooks/post-update" \
     || die "failed to setup post-receive git hook"
   popd >/dev/null
 }
