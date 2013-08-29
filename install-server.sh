@@ -70,7 +70,7 @@ copy_bin() {
   for i in bin/*; do
     submsg "${repo_home}/${i}"
     install -m755 "${i}" "${repo_home}/bin/" \
-    || die "failed to copy scripts"
+      || die "failed to copy scripts"
   done
 }
 
@@ -95,5 +95,6 @@ config_home() {
 check_config
 setup_user
 setup_home
+copy_bin
 setup_admin_repo
 config_home
