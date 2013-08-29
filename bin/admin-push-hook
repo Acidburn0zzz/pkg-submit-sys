@@ -1,0 +1,66 @@
+#!/usr/bin/env bash
+
+# update ~/.ssh/authorized_keys
+
+# 'packagers' contains a list of ssh keys
+# for users allowed to push to repositories
+
+# 'core' can push to package repos as well as
+# merge the [testing] repository to the rest
+
+authfile="${HOME}/.ssh/authorized_keys"
+newfile="${authfile}.new"
+
+access="no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty"
+
+die() {
+  local mesg="$1"; shift
+  printf "\033[1;35merror:\033[0;0m ${mesg}\n" "$@" >&2
+  exit 1
+}
+
+cat_file() {
+  local file="$1"
+  local cmd="$2"
+  local blob=$(git ls-tree -r HEAD | grep -E "blob [a-f0-9]{40}\s*${file}\$")
+  if (( $? == 0 )); then
+    git cat-file blob "${blob}"
+  fi
+}
+
+add_packager() {
+  local line="$1"
+  local user="${1%%:*}"
+  local key="${1#*:}"
+
+  printf 'command="%s/bin/receive-package %s",%s %s\n' \
+    "$HOME" \
+    "$user" \
+    "$access" \
+    "$key" \
+    >> "${HOME}/.ssh/authorized_keys.new" >&3
+}
+
+add_core() {
+  # to do
+  add_packager "$@"
+}
+
+if [ -e "${newfile}" ]; then
+  rm "${newfile}" || die "failed to remove previous .new file"
+fi
+
+# open the file only once in case someone moves it while we are running
+exec 3>"${newfile}"
+
+while read line; do
+  add_packager "${line}"
+done < <$(cat_file packagers)
+
+while read line; do
+  add_core "${line}"
+done < <$(cat_file core)
+
+exec 3>&-
+
+mv "${newfile}" "${authfile}" || die "failed to replace authorization file"

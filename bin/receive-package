@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+user="$1"
+
+echo "Functionality not implemented yet"
