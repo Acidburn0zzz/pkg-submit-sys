@@ -60,7 +60,7 @@ setup_home() {
     admin
   do
     submsg "${repo_home}/${i}"
-    install -dm755 -o "${repo_uid}" -g "${repo_gid}" "${repo_home}/${i}" \\
+    install -dm755 -o "${repo_uid}" -g "${repo_gid}" "${repo_home}/${i}" \
       || die "failed to create home directory structure"
   done
 }
