@@ -92,6 +92,7 @@ config_home() {
     || die "failed to create .ssh/admin_keys.pub"
 
   chown -R "${repo_uid}:${repo_gid}" "${repo_home}/.ssh"
+  msg "running admin push hook to populate the authorized_keys file"
   su - repo /bin/sh -c "cd ~/admin/admin.git && ../../bin/admin-push-hook"
 }
 
