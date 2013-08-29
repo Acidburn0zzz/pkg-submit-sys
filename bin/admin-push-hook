@@ -5,7 +5,7 @@
 # 'packagers' contains a list of ssh keys
 # for users allowed to push to repositories
 
-# 'core' can push to package repos as well as
+# 'core-group' can push to package repos as well as
 # merge the [testing] repository to the rest
 
 authfile="${HOME}/.ssh/authorized_keys"
@@ -57,7 +57,7 @@ buildfile() {
 
   while read line; do
     add_core "${line}"
-  done < <(cat_file core)
+  done < <(cat_file core-group)
 
   exec 3>&-
 }
