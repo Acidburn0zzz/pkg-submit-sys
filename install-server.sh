@@ -76,14 +76,14 @@ copy_bin() {
 
 setup_admin_repo() {
   msg "setting up admin repository"
-  pushd "${repo_home}/admin" \
+  pushd "${repo_home}/admin" >/dev/null \
     || die "failed to change directory to ${repo_home}/admin"
   [ -d "admin.git" ] || git init --bare admin.git \
     || die "failed to initialize admin git repository"
   submsg "setting up git push hook"
   ln -svf "${repo_home}/bin/admin-push-hook" "admin.git/hooks/post-receive" \
     || die "failed to setup post-receive git hook"
-  popd
+  popd >/dev/null
 }
 
 config_home() {
