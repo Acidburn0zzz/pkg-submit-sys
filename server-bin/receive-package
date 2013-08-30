@@ -97,11 +97,11 @@ for repo in *; do
     continue;
   fi
 
-  if pushd "${repo}" 2>/dev/null; then
+  if pushd "${repo}" >/dev/null; then
     for pkg in *.pkg.tar.xz; do
       push_package "${repo}" "${pkg}"
     done
-    popd 2>/dev/null || die "failed to enter previous directory"
+    popd >/dev/null || die "failed to enter previous directory"
   fi
 done
 
