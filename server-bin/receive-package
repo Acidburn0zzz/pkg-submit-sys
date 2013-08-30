@@ -63,12 +63,30 @@ bail() {
 cd "${path}" || bail "failed to change to package directory"
 
 repo_exists() {
-
+  local repo="$1"
+  if [[ ! -d "${repo_base}/${repo}/os" ]]; then
+    err "no such repository: %s" "${repo}"
+    false
+  else
+    true
+  fi
 }
 
 check_access() {
   # currently we don't have such fine access controls
   :
+}
+
+push_package() {
+  local repo="$1"
+  local pkg="$2"
+
+  local pkgname="${pkg%%-[0-9]*}"
+  local archend="${pkg##*-}"
+  local arch="${archend%%.*}"
+
+  msg "package: %s for architecture %s" "${pkgname}" "${arch}"
+
 }
 
 for repo in *; do
@@ -79,6 +97,12 @@ for repo in *; do
     continue;
   fi
 
+  if pushd "${repo}" 2>/dev/null; then
+    for pkg in *.pkg.tar.xz; do
+      push_package "${repo}" "${pkg}"
+    done
+    popd 2>/dev/null || die "failed to enter previous directory"
+  fi
 done
 
 msg "Functionality not implemented yet"
