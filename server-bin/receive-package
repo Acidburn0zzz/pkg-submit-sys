@@ -86,6 +86,8 @@ push_package_to() {
   local dest="${repo_base}/${repo}/os/${arch}"
   local db="${dest}/${repo}.db.tar.gz"
 
+  msg "starting with  %s for architecture %s" "${pkgname}" "${arch}"
+
   # The repository database must exist
   if [[ ! -d "${dest}" || ! -e "${db}" ]]; then
     err "Found no repo database for repository %s at: %s" "${repo}" "${db}"
@@ -129,6 +131,8 @@ push_package_to() {
   done
 
   popd > /dev/null || bail "Failed to go back to previous directory"
+
+  msg "finished with  %s for architecture %s" "${pkgname}" "${arch}"
 }
 
 push_package() {
@@ -174,7 +178,7 @@ for repo in *; do
   fi
 done
 
-msg "Functionality not implemented yet"
+msg "Thanks for your contribution."
 cleanup
 
 # vim: set ts=2 sts=2 sw=2 et:
