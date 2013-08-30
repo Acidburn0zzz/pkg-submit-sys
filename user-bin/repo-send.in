@@ -5,6 +5,8 @@ repo_list=(testing core extra community linux multilib devel)
 repo_host=archbsd.net
 identity=~/.ssh/repo-submit
 
+conffile="%%SYSCONFDIR%%/absd-repo-send.conf"
+[ -f "$conffile" ] && source "$conffile"
 conffile="$HOME/.config/absd-repo-send.conf"
 [ -f "$conffile" ] && source "$conffile"
 
