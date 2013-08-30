@@ -75,7 +75,7 @@ fi
 # And action...!
 files=()
 check_package() {
-  local pkg="${1}"
+  local pkg="$(readlink -f ${1})"
   local sig="${pkg}.sig"
   if [ -f "${sig}" ]; then
     if ! gpg --verify "${sig}" &>/dev/null; then
