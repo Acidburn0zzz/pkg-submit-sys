@@ -67,9 +67,11 @@ setup_home() {
 
 copy_bin() {
   msg "installing scripts"
-  for i in bin/*; do
-    submsg "${repo_home}/${i}"
-    install -g "${repo_gid}" -m755 -o "${repo_uid}" "${i}" "${repo_home}/${i}" \
+  install -d -g "${repo_gid}" -m755 -o "${repo_uid}" "${repo_home}/bin" \
+    || die "failed to create user's bin/ directory"
+  for i in server-bin/*; do
+    submsg "${i#server-}"
+    install -g "${repo_gid}" -m755 -o "${repo_uid}" "${i}" "${repo_home}/bin/" \
       || die "failed to copy scripts"
   done
 }
@@ -106,3 +108,5 @@ setup_home
 copy_bin
 setup_admin_repo
 config_home
+
+# vim: set ts=2 sts=2 sw=2 et:
