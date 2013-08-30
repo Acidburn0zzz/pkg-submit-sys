@@ -98,7 +98,8 @@ if (( "${#files}" == 0 )); then
 fi
 
 # strip away file paths and upload to the server
-bsdtar "${cdir[@]}" -cf - -s "|^.*|${opt_repo}/|" "${files[@]}" \
+msg "files: %s" "${files[*]}"
+bsdtar "${cdir[@]}" -cf - -s "|^.*/|${opt_repo}/|" "${files[@]}" \
   | ssh -i "${repo_identity}" "${repo_user}@${repo_host}"
 
 # vim: set ts=2 sts=2 sw=2 et:
