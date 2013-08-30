@@ -64,7 +64,7 @@ opt_repo="${opt_repo:-testing}"
 
 found=0
 for i in "${repo_list[@]}"; do
-  if (( "$i" == "${opt_repo}" )); then
+  if [[ "$i" == "${opt_repo}" ]]; then
     found=1; break;
   fi
 done
@@ -99,13 +99,13 @@ fi
 
 # strip away file paths and upload to the server
 for i in "${files[@]}"; do
-  dir="${i%/*}"
+  dir=$(dirname "$i")
   base="${i##*/}"
   cdir=()
-  if [[ -n "${dir}" ]]; then
+  if [[ "$dir" != "." ]]; then
     cdir=(-C "${dir}")
   fi
-  bsdtar "${cdir[@]}" -cf - -s "|^|${opt_repo}/|" "$i"
+  bsdtar "${cdir[@]}" -cf - -s "|^|${opt_repo}/|" "$base"
 done \
 | ssh -i "${repo_identity}" "${repo_user}@${repo_host}"
 
