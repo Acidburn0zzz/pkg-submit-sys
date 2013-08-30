@@ -7,7 +7,8 @@ err() {
 
 wrn() {
   local mesg="$1"; shift
-  printf " (remote) \033[1;33m---:\033[0;0m ${mesg}\n" "$@" >&2
+  printf " (remote) \033[1;33m---:\033[0;0m ${mesg}\n" "$@" \
+    | tee "${path}/warnings" >&2
 }
 
 msg() {
@@ -183,6 +184,10 @@ for repo in *; do
   fi
 done
 
+if [[ -e "${path}/warnings" ]]; then
+  msg "Repeating all warnings for you at the end now:"
+  cat "${path}/warnings"
+fi
 msg "Thanks for your contribution."
 cleanup
 
