@@ -89,6 +89,7 @@ push_package() {
 
 }
 
+msg "Pushing packages..."
 for repo in *; do
   if ! repo_exists "${repo}"; then
     continue;
