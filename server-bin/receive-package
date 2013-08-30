@@ -93,7 +93,7 @@ push_package_to() {
   local dest="${repo_base}/${repo}/os/${arch}"
   local db="${dest}/${repo}.db.tar.gz"
 
-  msg "starting with  %s for architecture %s" "${pkgname}" "${arch}"
+  msg "starting with %s for architecture %s" "${pkgname}" "${arch}"
 
   # The repository database must exist
   if [[ ! -d "${dest}" || ! -e "${db}" ]]; then
