@@ -3,7 +3,6 @@
 err() {
   local mesg="$1"; shift
   printf " (remote) \033[1;31merror:\033[0;0m ${mesg}\n" "$@" >&2
-  exit 1
 }
 
 msg() {
