@@ -154,8 +154,10 @@ push_package() {
   local pkgver="${verend%-${arch}*}"
 
   msg "package: %s version %s for architecture %s" "${pkgname}" "${pkgver}" "${arch}"
-  # check for an existing package
+  # we use these args multiple times :P
   local args=("${repo}" "${pkg}" "${pkgname}" "${pkgver}")
+
+  # push to either the package's arch, or all of them on 'any'
   case "${arch}" in
     i686|x86_64)
       push_package_to "${arch}" "${args[@]}"
