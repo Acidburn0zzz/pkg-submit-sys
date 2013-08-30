@@ -43,7 +43,7 @@ fi
 
 
 msg "receiving files..."
-bsdtar -C "${path}" -xvf - <&0 &
+bsdtar -C "${path}" -xf - <&0 &
 pid=$!
 exec 0>&-
 wait "${pid}"

@@ -105,8 +105,9 @@ for i in "${files[@]}"; do
   if [[ "$dir" != "." ]]; then
     cdir=(-C "${dir}")
   fi
-  bsdtar "${cdir[@]}" -cf - -s "|^|${opt_repo}/|" "$base"
+  msg "file: $i" >&2
+  bsdtar "${cdir[@]}" -cf - -s "|^|${opt_repo}/|" "$base" >&1
 done \
-| ssh -i "${repo_identity}" "${repo_user}@${repo_host}"
+  | ssh -i "${repo_identity}" "${repo_user}@${repo_host}"
 
 # vim: set ts=2 sts=2 sw=2 et:
