@@ -98,7 +98,7 @@ if (( "${#files}" == 0 )); then
 fi
 
 # strip away file paths and upload to the server
-msg "files: %s" "${files[*]}"
+msg "sending..."
 bsdtar "${cdir[@]}" -cf - -s "|^.*/|${opt_repo}/|" "${files[@]}" \
   | ssh -i "${repo_identity}" "${repo_user}@${repo_host}"
 
