@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+repo_user=repo
+repo_list=(testing core extra community linux multilib devel)
+
+progname=$0
+
+msg() {
+  local mesg="$1"; shift
+  printf "\033[1;32m***\033[0;0m ${mesg}\n" "$@"
+}
+
+die() {
+  local mesg="$1"; shift
+  printf "\033[1;31merror:\033[0;0m ${mesg}\n" "$@" >&2
+  exit 1
+}
+
+usage() {
+  cat <<EOF
+usage: ${progname} [options] packages...
+options:
+  -h, --help        show this help message
+  -r, --repo=REPO   upload to this repo instead of [testing]
+EOF
+}
+
+setonce() {
+  eval wasset=\${${2}=NOTSET}
+  if (( "$wasset" != "NOTESET" )); then
+    echo "option $1 can only be used once"
+    usage
+    exit 1
+  fi
+  eval "$2=$3"
+}
+
+# option parsing
+opts=$(getopt -n "$progname" -o 'hr:' -l 'help,repo:' -- "$@")
+if (( $? != 0 )); then
+  usage >&2
+  exit 1
+fi
+eval set -- "$opts"
+while (( $# > 0 )); do
+  case "$1" in
+    -r|--repo) setonce -r opt_repo "$2"; shift 2 ;;
+    -h|--help) usage; exit 0 ;;
+    --) shift ; break ;;
+    *)  echo "unknown option: $1"; usage; exit 1 ;;
+  esac
+done
+
+if (( $# == 0 )); then
+  usage
+  exit 1
+fi
+
+# default options
+opt_repo="${opt_repo:-testing}"
+
+# And action...!
+echo "  files: $@"
+echo "  repo: ${opt_repo}"
+
+files=()
+check_package() {
+  local pkg="${1}"
+  local sig="${pkg}.sig"
+  if [ -f "${sig}" ]; then
+    if ! gpg --verify "${sig}" &>/dev/null; then
+      die "invalid signature: ${sig}"
+    fi
+  fi
+
+  if [ ! -f "${sig}" ]; then
+    gpg --detach-sign "${pkg}" || die "signing failed"
+  fi
+  files=("${files[@]}" "$pkg" "$sig")
+}
+
+for i in "$@"; do
+  check_package "$i"
+done
+
+if (( "${#files}" == 0 )); then
+  die "No files to upload"
+fi
+
+bsdtar -cf - -s "|^|${opt_repo}/|" "${files[@]}" | bsdtar -tf -
+
+# vim: set ts=2 sts=2 sw=2 et:
