@@ -54,5 +54,6 @@ if (( $? != 0 )); then
 fi
 
 msg "Functionality not implemented yet"
+cleanup
 
 # vim: set ts=2 sts=2 sw=2 et:
