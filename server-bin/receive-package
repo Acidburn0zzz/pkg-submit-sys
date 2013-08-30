@@ -77,6 +77,61 @@ check_access() {
   :
 }
 
+push_package_to() {
+  local arch="$1"
+  local repo="$2"
+  local file="$3"
+  local pkgname="$4"
+  local pkgver="$5"
+
+  local dest="${repo_base}/${repo}/os/${arch}"
+  local db="${dest}/${repo}.db.tar.gz"
+
+  # The repository database must exist
+  if [[ ! -d "${dest}" -o ! -e "${db}" ]]; then
+    err "Found no repo database for repository %s at: %s" "${repo}" "${db}"
+    return 1
+  fi
+
+  # A file of the same name and version must not exist
+  if [[ -e "${dest}/${file}" ]]; then
+    err "Package %s already exists in %s-[%s] (same version)" "${pkgname}" "${arch}" "${repo}"
+    return 1
+  fi
+
+  # Push!
+  if ! cp "${file}" "${file}.sig" "${dest}"; then
+    err "Failed to copy package files: ${file}"
+    return 1
+  fi
+
+  # Go to the repo dir
+  if ! pushd "${dest}" > /dev/null; then
+    err "Failed to change to repository-directory"
+    return 1
+  fi
+
+  # Add the package
+  if ! repo-add -f "${repo}.db.tar.gz" "${file}"; then
+    err "Failed to add package to repository"
+    popd > /dev/null || bail "Failed to go back to previous directory"
+    return 1
+  fi
+
+  # Remove older packages
+  for i in "${pkgname}"-*.pkg.tar.xz; do
+    case "$i" in
+      $file) : ;;
+      ${pkgname}-[0-9]*.pkg.tar.xz)
+        msg "Removing old version of %s" "${pkgname}"
+        rm -f "${i}" "${i}.sig"
+        ;;
+    esac
+  done
+
+  popd > /dev/null || bail "Failed to go back to previous directory"
+}
+
 push_package() {
   local repo="$1"
   local pkg="$2"
@@ -89,6 +144,18 @@ push_package() {
   local pkgver="${verend%-${arch}*}"
 
   msg "package: %s version %s for architecture %s" "${pkgname}" "${pkgver}" "${arch}"
+  # check for an existing package
+  local args=("${repo}" "${pkg}" "${pkgname}" "${pkgver}")
+  case "${arch}" in
+    i686|x86_64)
+      push_package_to "${arch}" "${args[@]}"
+      ;;
+    any)
+      for i in i686 x86_64; do
+        push_package_to "${i}" "${args[@]}"
+      done
+      ;;
+  esac
 }
 
 msg "Pushing packages..."
@@ -104,7 +171,7 @@ for repo in *; do
     for pkg in *.pkg.tar.xz; do
       push_package "${repo}" "${pkg}"
     done
-    popd >/dev/null || die "failed to enter previous directory"
+    popd >/dev/null || bail "failed to enter previous directory"
   fi
 done
 
