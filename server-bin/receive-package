@@ -86,7 +86,7 @@ push_package() {
   local arch="${archend%%.*}"
 
   local verend="${pkg#${pkgname}-}"
-  local pkgver="${verend#%-${arch}*}"
+  local pkgver="${verend%-${arch}*}"
 
   msg "package: %s version %s for architecture %s" "${pkgname}" "${pkgver}" "${arch}"
 }
