@@ -22,9 +22,9 @@ cleanup() {
 
 # when the client disconnects our parent dies and we recieve this signal
 # so start the cleanup process
-trap cleanup SIGHUP
+trap cleanup SIGHUP SIGTERM SIGINT
 
-template="${HOME}/uploads/${user}"
+template="${HOME}/uploads/${user}/XXXXXXXX"
 path=$(mktemp -d "${template}")
 if (( $? != 0 )); then
   err "failed to create directory"
