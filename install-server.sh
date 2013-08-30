@@ -100,6 +100,11 @@ config_home() {
   chown -R "${repo_uid}:${repo_gid}" "${repo_home}/.ssh"
   msg "running admin push hook to populate the authorized_keys file"
   su - "${repo_user}" -c "cd ~/admin/admin.git && ../../bin/admin-push-hook 2>/dev/null"
+
+  {
+    grep '^repo_user=' config.sh
+    grep '^repo_base=' config.sh
+  } > "${repo_home}/admin/config"
 }
 
 check_config
