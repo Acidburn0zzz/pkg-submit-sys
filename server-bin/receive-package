@@ -11,6 +11,11 @@ msg() {
   printf " (remote) \033[1;32m***\033[0;0m ${mesg}\n" "$@"
 }
 
+die() {
+  err "$@"
+  exit 1
+}
+
 user="$1"
 
 cleanup() {
@@ -19,6 +24,11 @@ cleanup() {
   fi
   exit 1
 }
+
+install -dm755 "${HOME}/uploads" \
+  || die "failed to create uploads directory"
+install -dm755 "${HOME}/uploads/${user}" \
+  || die "failed to create user's upload directory"
 
 # when the client disconnects our parent dies and we recieve this signal
 # so start the cleanup process
