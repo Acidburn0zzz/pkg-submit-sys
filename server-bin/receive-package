@@ -16,6 +16,8 @@ die() {
   exit 1
 }
 
+source "$HOME/admin/config" || die "failed to read configuration"
+
 user="$1"
 
 cleanup() {
@@ -52,6 +54,32 @@ if (( $? != 0 )); then
   cleanup
   exit 1
 fi
+
+bail() {
+  err "$@"
+  cleanup
+}
+
+cd "${path}" || bail "failed to change to package directory"
+
+repo_exists() {
+
+}
+
+check_access() {
+  # currently we don't have such fine access controls
+  :
+}
+
+for repo in *; do
+  if ! repo_exists "${repo}"; then
+    continue;
+  fi
+  if ! check_access "${repo}"; then
+    continue;
+  fi
+
+done
 
 msg "Functionality not implemented yet"
 cleanup
