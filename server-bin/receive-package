@@ -139,7 +139,7 @@ push_package_to() {
 
   popd > /dev/null || bail "Failed to go back to previous directory"
 
-  msg "finished with  %s for architecture %s" "${pkgname}" "${arch}"
+  msg "finished with %s for architecture %s" "${pkgname}" "${arch}"
 }
 
 push_package() {
