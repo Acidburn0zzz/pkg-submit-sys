@@ -88,7 +88,7 @@ push_package_to() {
   local db="${dest}/${repo}.db.tar.gz"
 
   # The repository database must exist
-  if [[ ! -d "${dest}" -o ! -e "${db}" ]]; then
+  if [[ ! -d "${dest}" || ! -e "${db}" ]]; then
     err "Found no repo database for repository %s at: %s" "${repo}" "${db}"
     return 1
   fi
