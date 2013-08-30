@@ -101,5 +101,6 @@ fi
 msg "sending..."
 bsdtar "${cdir[@]}" -cf - -s "|^.*/|${opt_repo}/|" "${files[@]}" \
   | ssh -i "${repo_identity}" "${repo_user}@${repo_host}"
+msg "Please do not ignore any warnings or errors above."
 
 # vim: set ts=2 sts=2 sw=2 et:
