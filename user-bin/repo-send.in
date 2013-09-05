@@ -109,10 +109,11 @@ protocol() {
     # we expect the host to send us byte sizes, or status messages
     case "$line" in
       [0-9]*) # progress update
-        printf '\r           \rstatus update: %s\n' "${line}"
+        local percent=$(echo "scale=1; (100*${line}) / ${size}" | bc)
+        printf '\rprogress: %g%%' "${percent}"
         ;;
       *) # message
-        printf '\r           \r%s\n' "${line}"
+        printf '\r%s\n' "${line}"
         ;;
     esac
   done
