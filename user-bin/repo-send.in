@@ -101,9 +101,27 @@ if (( "${#files}" == 0 )); then
   die "No files to upload"
 fi
 
+msg "determining file size..."
+size=$(stat -Lf '%z' "${files[@]}" | awk 'BEGIN{s=0} {s+=$1} END{print s}')
+
+protocol() {
+  while read line; do
+    # we expect the host to send us byte sizes, or status messages
+    case "$line" in
+      [0-9]*) # progress update
+        printf '\r           \rstatus update: %s\n' "${line}"
+        ;;
+      *) # message
+        printf '\r           \r%s\n' "${line}"
+        ;;
+    esac
+  done
+}
+
 # strip away file paths and upload to the server
 msg "sending..."
 bsdtar -cf - -s "|^.*/|${opt_repo}/|" "${files[@]}" \
-  | ssh -i "${identity}" "${repo_user}@${repo_host}"
+  | ssh -i "${identity}" "${repo_user}@${repo_host}" \
+  2>&1 | protocol
 
 # vim: set ts=2 sts=2 sw=2 et:
