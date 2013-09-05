@@ -49,17 +49,29 @@ if (( $? != 0 )); then
   exit 1
 fi
 
+send_progress() {
+  while : ; do
+    du -sk "${path}" | awk '{print 1024 * $1}'
+    sleep 1
+  done
+}
 
 msg "receiving files..."
-bsdtar -C "${path}" -xvf - <&0 &
+# 2> >(cat) to buffer bsdtar's 'x' output as it flushes without
+# \n when starting a file, and prints \n at the end of the file
+bsdtar -C "${path}" -xvf - <&0 2> >(cat) &
 pid=$!
 exec 0>&-
+send_progress &
+progress=$!
 wait "${pid}"
 if (( $? != 0 )); then
   err "failed to unpack received data"
   cleanup
   exit 1
 fi
+kill "${progress}" 2>/dev/null
+wait "${progress}"
 
 bail() {
   err "$@"
