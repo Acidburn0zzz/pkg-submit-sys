@@ -102,15 +102,47 @@ if (( "${#files}" == 0 )); then
 fi
 
 msg "determining file size..."
+Now() {
+  date '+%s'
+}
 size=$(stat -Lf '%z' "${files[@]}" | awk 'BEGIN{s=0} {s+=$1} END{print s}')
+recv_bytes=0
+last=`Now`
+speed=""
+
+human_readable() {
+  local speed=$1
+  local rate='b'
+  if (( $speed > 1024 )); then
+    rate='K'; speed=$(echo "scale=2; $speed / 1024" | bc)
+  fi
+  if (( ${speed%.*} > 1024 )); then
+    rate='M'; speed=$(echo "scale=2; $speed / 1024" | bc)
+  fi
+  echo "${speed}${rate}/s"
+}
+
+progress() {
+  local bytes="$1"
+  local percent=$(echo "scale=1; (100*${bytes}) / ${size}" | bc)
+  local now=`Now`
+
+  if (( "$now" != "$last" )); then
+    local new_bytes=$[bytes - recv_bytes];
+    speed=$(human_readable $new_bytes)
+    last=$now
+    recv_bytes=$bytes
+  fi
+
+  printf '*progress: %g%%  (%s)    \r' "${percent}" "${speed}"
+}
 
 protocol() {
   while read line; do
     # we expect the host to send us byte sizes, or status messages
     case "$line" in
       [0-9]*) # progress update
-        local percent=$(echo "scale=1; (100*${line}) / ${size}" | bc)
-        printf '*progress: %g%%   \r' "${percent}"
+        progress "${line}"
         ;;
       *) # message
         printf '%s\n' "${line}"
