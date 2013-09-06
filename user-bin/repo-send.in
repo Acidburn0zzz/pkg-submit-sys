@@ -110,10 +110,10 @@ protocol() {
     case "$line" in
       [0-9]*) # progress update
         local percent=$(echo "scale=1; (100*${line}) / ${size}" | bc)
-        printf '\rprogress: %g%%' "${percent}"
+        printf '*progress: %g%%   \r' "${percent}"
         ;;
       *) # message
-        printf '\r%s\n' "${line}"
+        printf '%s\n' "${line}"
         ;;
     esac
   done
