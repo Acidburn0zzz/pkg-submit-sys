@@ -5,6 +5,8 @@ repo_list=(testing core extra community linux multilib devel)
 repo_host=archbsd.net
 identity=~/.ssh/repo-submit
 
+GETOPT="%%GETOPT%%"
+
 conffile="%%SYSCONFDIR%%/absd-repo-send.conf"
 [ -f "$conffile" ] && source "$conffile"
 conffile="$HOME/.config/absd-repo-send.conf"
@@ -43,7 +45,7 @@ setonce() {
 }
 
 # option parsing
-opts=$(getopt -n "$progname" -o 'hr:' -l 'help,repo:' -- "$@")
+opts=$($GETOPT -n "$progname" -o 'hr:' -l 'help,repo:' -- "$@")
 if (( $? != 0 )); then
   usage >&2
   exit 1
