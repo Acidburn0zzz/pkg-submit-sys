@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env perl
 
 # update ~/.ssh/authorized_keys
 
@@ -8,63 +8,96 @@
 # 'core-group' can push to package repos as well as
 # merge the [testing] repository to the rest
 
-authfile="${HOME}/.ssh/authorized_keys"
-basefile="${HOME}/.ssh/admin_keys.pub"
-newfile="${authfile}.new"
+use strict;
+use warnings;
+use Fcntl qw(:flock);
 
-access="no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty"
+my $HOME=$ENV{HOME};
+my $authfile="${HOME}/.ssh/authorized_keys";
+my $basefile="${HOME}/.ssh/admin_keys.pub";
+my $newfile="${authfile}.new";
 
-die() {
-  local mesg="$1"; shift
-  printf "\033[1;35merror:\033[0;0m ${mesg}\n" "$@" >&2
-  exit 1
+my $access="no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty";
+
+sub mydie($@) {
+  my ($mesg, @rest) = @_;
+  printf STDERR "\033[1;35merror:\033[0;0m ${mesg}\n", @rest;
+  exit(1);
 }
 
-cat_file() {
-  local file="$1"
-  local blob=$(git ls-tree -r master | grep -E "blob [a-f0-9]{40}.*${file}\$" | awk '{print $3}')
-  if (( $? == 0 )); then
-    git cat-file blob "${blob}" 2>/dev/null
-  fi
+sub blob_for_file($) {
+  my ($file) = @_;
+
+  my $ret = undef;
+
+  open my $cmd, '-|', 'git ls-tree -r master';
+  while (<$cmd>) {
+    next unless /blob ([a-f0-9]{40})\s+${file}$/;
+    $ret = $1;
+    last;
+  }
+  close $cmd;
+  return $ret;
 }
 
-add_packager() {
-  local line="$1"
-  local user="${1%%:*}"
-  local key="${1#*:}"
+sub add_packager($$) {
+  my ($fh, $line) = @_;
 
-  printf 'command="%s/bin/receive-package %s",%s %s\n' \
-    "$HOME" \
-    "$user" \
-    "$access" \
-    "$key" \
-    >&3
+  unless($line =~ /^(\w+):\s*(.*)$/){
+    print STDERR "invalid line: $line\n";
+    return;
+  }
+
+  my $user=$1;
+  my $key=$2;
+
+  printf {$fh} "command=\"%s/bin/receive-package %s\",%s %s\n",
+    $HOME, $user, $access, $key;
 }
 
-add_core() {
+sub add_core($$) {
+  my ($fh, $key) = @_;
   # to do
-  add_packager "$@"
+  return add_packager($fh, $key);
 }
 
-buildfile() {
-  exec 3>"${newfile}"
-  cat "${basefile}" >&3
+sub buildfile($) {
+  my ($fh) = @_;
+  my ($in, $blob);
+  open $in, '<', $basefile;
+  while (<$in>) {
+    print {$fh} $_;
+  }
+  close $in;
 
-  while read line; do
-    add_packager "${line}"
-  done < <(cat_file packagers)
+  $blob = blob_for_file('packagers');
+  if (defined($blob)) {
+    open $in, '-|', 'git', 'cat-file', 'blob', $blob;
+    while (<$in>) {
+      chomp; next if /^(?:#|$)/;
+      add_packager($fh, $_);
+    }
+    close $in;
+  }
 
-  while read line; do
-    add_core "${line}"
-  done < <(cat_file core-group)
-
-  exec 3>&-
+  $blob = blob_for_file('core-group');
+  if (defined($blob)) {
+    open $in, '-|', 'git', 'cat-file', 'blob', $blob;
+    while (<$in>) {
+      chomp; next if /^(?:#|$)/;
+      add_core($fh, $_);
+    }
+    close $in;
+  }
 }
 
-case "$1" in
-  buildfile) buildfile ;;
-  *)
-    flock -x "${newfile}" "$0" buildfile
-    mv -v "${newfile}" "${authfile}" || die "failed to replace authorization file"
-    ;;
-esac
+sub main() {
+  open my $fh, '>', $newfile;
+  flock($fh, LOCK_EX);
+  buildfile($fh);
+  rename($newfile, $authfile) or mydie("failed to replace authorization file");
+  flock($fh, LOCK_UN);
+  close($fh);
+}
+
+main();
