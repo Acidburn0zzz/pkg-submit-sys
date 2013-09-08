@@ -57,7 +57,7 @@ send_progress() {
 }
 
 msg "receiving files..."
-# 2> >(cat) to buffer bsdtar's 'x' output as it flushes without
+# 2> >(tail) to buffer bsdtar's 'x' output as it flushes without
 # \n when starting a file, and prints \n at the end of the file
 bsdtar -C "${path}" -xvf - <&0 2> >(tail -f) &
 pid=$!
