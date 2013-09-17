@@ -172,7 +172,7 @@ push_package() {
   local pkgver="${verend%-${arch}*}"
 
   msg "package: %s version %s for architecture %s" "${pkgname}" "${pkgver}" "${arch}"
-  push_hook "${pkgname}" "${pkgver}" "${arch}"
+  push_hook "${pkgname}" "${pkgver}" "${arch}" "${repo}"
 
   # we use these args multiple times :P
   local args=("${repo}" "${pkg}" "${pkgname}" "${pkgver}")
