@@ -154,6 +154,12 @@ push_package_to() {
   msg "finished with %s for architecture %s" "${pkgname}" "${arch}"
 }
 
+push_hook() {
+  if [[ -n "${push_hook}" ]]; then
+    ${push_hook} "${user}" "$@"
+  fi
+}
+
 push_package() {
   local repo="$1"
   local pkg="$2"
@@ -166,6 +172,8 @@ push_package() {
   local pkgver="${verend%-${arch}*}"
 
   msg "package: %s version %s for architecture %s" "${pkgname}" "${pkgver}" "${arch}"
+  push_hook "${pkgname}" "${pkgver}" "${arch}"
+
   # we use these args multiple times :P
   local args=("${repo}" "${pkg}" "${pkgname}" "${pkgver}")
 
