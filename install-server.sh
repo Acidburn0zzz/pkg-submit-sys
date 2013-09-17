@@ -104,6 +104,7 @@ config_home() {
   {
     grep '^repo_user=' config.sh
     grep '^repo_base=' config.sh
+    grep '^push_hook=' config.sh
   } > "${repo_home}/admin/config"
 }
 
