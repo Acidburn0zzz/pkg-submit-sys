@@ -45,7 +45,8 @@ setonce() {
 }
 
 # option parsing
-opts=$($GETOPT -n "$progname" -o 'hr:' -l 'help,repo:' -- "$@")
+opt_debug=0
+opts=$($GETOPT -n "$progname" -o 'hr:' -l 'help,repo:,debug' -- "$@")
 if (( $? != 0 )); then
   usage >&2
   exit 1
@@ -55,6 +56,7 @@ while (( $# > 0 )); do
   case "$1" in
     -r|--repo) setonce -r opt_repo "$2"; shift 2 ;;
     -h|--help) usage; exit 0 ;;
+    --debug) opt_debug=1; shift 1 ;;
     --) shift ; break ;;
     *)  echo "unknown option: $1"; usage; exit 1 ;;
   esac
@@ -142,6 +144,9 @@ progress() {
 protocol() {
   while read line; do
     # we expect the host to send us byte sizes, or status messages
+    if (( $opt_debug != 0 )); then
+      printf 'debug: %s\n' "${line}"
+    fi
     case "$line" in
       [0-9]*) # progress update
         progress "${line}"
