@@ -43,7 +43,7 @@ sub blob_for_file($) {
 sub add_packager($$) {
   my ($fh, $line) = @_;
 
-  unless($line =~ /^(\w+):\s*(.*)$/){
+  unless($line =~ m/^(\w+):\s*(.*)$/){
     print STDERR "invalid line: $line\n";
     return;
   }
@@ -61,34 +61,40 @@ sub add_core($$) {
   return add_packager($fh, $key);
 }
 
+sub add_admin($$) {
+  my ($fh, $key) = @_;
+
+  print {$fh} "${key}\n";
+}
+
+sub for_file($$$) {
+  my ($fh, $file, $func) = @_;
+
+  my $blob = blob_for_file($file);
+  if (defined($blob)) {
+    open my $in, '-|', 'git', 'cat-file', 'blob', $blob;
+    while (<$in>) {
+      chomp; next if /^(?:#|$)/;
+      $func->($fh, $_);
+    }
+    close $in;
+  }
+}
+
 sub buildfile($) {
   my ($fh) = @_;
-  my ($in, $blob);
-  open $in, '<', $basefile;
+
+  # cat the basefile into fh
+  open my $in, '<', $basefile;
   while (<$in>) {
     print {$fh} $_;
   }
   close $in;
 
-  $blob = blob_for_file('packagers');
-  if (defined($blob)) {
-    open $in, '-|', 'git', 'cat-file', 'blob', $blob;
-    while (<$in>) {
-      chomp; next if /^(?:#|$)/;
-      add_packager($fh, $_);
-    }
-    close $in;
-  }
-
-  $blob = blob_for_file('core-group');
-  if (defined($blob)) {
-    open $in, '-|', 'git', 'cat-file', 'blob', $blob;
-    while (<$in>) {
-      chomp; next if /^(?:#|$)/;
-      add_core($fh, $_);
-    }
-    close $in;
-  }
+  # process config files
+  for_file($fh, 'admins',     \&add_admin)
+  for_file($fh, 'packagers',  \&add_packager)
+  for_file($fh, 'core-group', \&add_core)
 }
 
 sub main() {
