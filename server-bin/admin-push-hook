@@ -92,9 +92,9 @@ sub buildfile($) {
   close $in;
 
   # process config files
-  for_file($fh, 'admins',     \&add_admin)
-  for_file($fh, 'packagers',  \&add_packager)
-  for_file($fh, 'core-group', \&add_core)
+  for_file($fh, 'admins',     \&add_admin);
+  for_file($fh, 'packagers',  \&add_packager);
+  for_file($fh, 'core-group', \&add_core);
 }
 
 sub main() {
