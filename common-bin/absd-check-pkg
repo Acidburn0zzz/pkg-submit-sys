@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+usr_local_whitelist=(
+  getopt
+)
+
+rv=0
+
+bad_package() {
+  local pkg="$1"; shift
+  printf '%s: %s\n' "${pkg}" "$@" >&2
+  rv=1
+}
+
+check_usr_local() {
+  local pkg="$1"
+  local name="$2"
+
+  for i in "${usr_local_whitelist[@]}"; do
+    if [[ "$name" == "$i" ]]; then
+      return
+    fi
+  done
+
+  bad_package "${pkg}" "$(gettext 'contains files in /usr/local')"
+}
+
+for i in "$@"; do
+  base="${i##*/}"
+  name="${base%%-[0-9]*}"
+  #ver="${base#${name}-}"
+  #ver="${ver%-[0-9]*}"
+  #ver="${ver%-*}"
+
+  rcd=0
+  initd=0
+  usrlocal=0
+  while read line; do
+    case "$line" in
+      etc/init.d/*) initd=1    ;;
+      etc/rc.d/*)   rcd=1      ;;
+      usr/local/*)  usrlocal=1 ;;
+    esac
+  done < <(tar -tf "$i")
+
+  if (( $rcd != $initd )); then
+    if (( $initd )); then
+      bad_package "$i" "$(gettext 'contains only OpenRC init scripts')"
+    fi
+    if (( $rcd )); then
+      bad_package "$i" "$(gettext 'contains only FreeBSD init scripts')"
+    fi
+  fi
+  if (( $usrlocal )); then
+    check_usr_local "$i" "$name"
+  fi
+done
+
+exit $rv
