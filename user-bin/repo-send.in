@@ -7,10 +7,9 @@ identity=~/.ssh/repo-submit
 
 GETOPT="%%GETOPT%%"
 
-conffile="%%SYSCONFDIR%%/absd-repo-send.conf"
-[ -f "$conffile" ] && source "$conffile"
-conffile="$HOME/.config/absd-repo-send.conf"
-[ -f "$conffile" ] && source "$conffile"
+source "%%LIBDIR%%/absd-utils/repo-send.conf" 2>/dev/null
+source "%%SYSCONFDIR%%/absd-utils/repo-send.conf" 2>/dev/null
+source "$HOME/.config/absd-utils/repo-send.conf" 2>/dev/null
 
 progname=$0
 
