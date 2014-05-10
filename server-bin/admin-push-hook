@@ -60,7 +60,7 @@ sub add_packager($$) {
   my $user=$1;
   my $key=$2;
 
-  printf {$fh} "command=\"%s/bin/receive-package %s\",%s %s\n",
+  printf {$fh} "command=\"%s/bin/receive-command %s\",%s %s\n",
     $HOME, $user, $ssh_access, $key;
 }
 

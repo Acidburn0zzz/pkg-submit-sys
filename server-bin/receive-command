@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+source "$HOME/lib/common.bash" || exit 1
+
+cmd="$SSH_ORIGINAL_COMMAND"
+
+user="$1"
+
+if [[ -z $cmd ]]; then
+  exec receive-package "$1"
+fi
+
+### TODO: implement additional commands/functionality

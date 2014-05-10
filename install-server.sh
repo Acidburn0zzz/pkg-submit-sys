@@ -57,6 +57,7 @@ setup_home() {
     uploads \
     log     \
     bin     \
+    lib     \
     admin
   do
     submsg "${repo_home}/${i}"
@@ -72,6 +73,11 @@ copy_bin() {
   for i in server-bin/*; do
     submsg "${i#server-}"
     install -g "${repo_gid}" -m755 -o "${repo_uid}" "${i}" "${repo_home}/bin/" \
+      || die "failed to copy scripts"
+  done
+  for i in server-lib/*; do
+    submsg "${i#server-}"
+    install -g "${repo_gid}" -m755 -o "${repo_uid}" "${i}" "${repo_home}/lib/" \
       || die "failed to copy scripts"
   done
 }
