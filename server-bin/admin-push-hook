@@ -17,14 +17,19 @@ my $authfile="${HOME}/.ssh/authorized_keys";
 my $basefile="${HOME}/.ssh/admin_keys.pub";
 my $newfile="${authfile}.new";
 
-my $access="no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty";
+my $ssh_access="no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty";
 
+# colorful!
 sub mydie($@) {
   my ($mesg, @rest) = @_;
   printf STDERR "\033[1;35merror:\033[0;0m ${mesg}\n", @rest;
   exit(1);
 }
 
+##
+# find a git blob object for a filename
+# blob_for_file (filename)
+#
 sub blob_for_file($) {
   my ($file) = @_;
 
@@ -40,6 +45,10 @@ sub blob_for_file($) {
   return $ret;
 }
 
+##
+# Handle a config line for regular packagers
+# add_packager (out_handle, line)
+#
 sub add_packager($$) {
   my ($fh, $line) = @_;
 
@@ -52,22 +61,39 @@ sub add_packager($$) {
   my $key=$2;
 
   printf {$fh} "command=\"%s/bin/receive-package %s\",%s %s\n",
-    $HOME, $user, $access, $key;
+    $HOME, $user, $ssh_access, $key;
 }
 
+##
+# Handle a config line from the 'core-group' file.
+# add_admin (out_handle, line)
+#
 sub add_core($$) {
-  my ($fh, $key) = @_;
-  # to do
-  return add_packager($fh, $key);
+  my ($fh, $line) = @_;
+
+  return add_packager($fh, $line);
 }
 
+##
+# Handle a config line from the 'admin' file.
+# add_admin (out_handle, line)
+#
 sub add_admin($$) {
-  my ($fh, $key) = @_;
+  my ($fh, $line) = @_;
 
-  print {$fh} "${key}\n";
+  print {$fh} "${line}\n";
 }
 
-sub for_file($$$) {
+##
+# Execute a function for each non-empty non-comment line in a git file.
+#
+# for_file_line (out_handle, file_name, function)
+#   out_handle    passed along as first parameter to <function>
+#   file_name     the file in the current git-tree to read using blob_for_file
+#   function      the function to execute for the file's lines
+#                 function(out_handle, line)
+#
+sub for_file_line($$$) {
   my ($fh, $file, $func) = @_;
 
   my $blob = blob_for_file($file);
@@ -81,7 +107,14 @@ sub for_file($$$) {
   }
 }
 
-sub buildfile($) {
+##
+# Build the authorized_keys file from the current configuration files found
+# in git.
+#
+# build_authorized_keys(out_handle)
+#   out_handle    handle to the current authorized_keys.new
+#
+sub build_authorized_keys($) {
   my ($fh) = @_;
 
   # cat the basefile into fh
@@ -92,15 +125,18 @@ sub buildfile($) {
   close $in;
 
   # process config files
-  for_file($fh, 'admins',     \&add_admin);
-  for_file($fh, 'packagers',  \&add_packager);
-  for_file($fh, 'core-group', \&add_core);
+  for_file_line($fh, 'admins',     \&add_admin);
+  for_file_line($fh, 'packagers',  \&add_packager);
+  for_file_line($fh, 'core-group', \&add_core);
 }
 
+##
+# Main function doing all the cool work!
+#
 sub main() {
   open my $fh, '>', $newfile;
   flock($fh, LOCK_EX);
-  buildfile($fh);
+  build_authorized_keys($fh);
   rename($newfile, $authfile) or mydie("failed to replace authorization file");
   flock($fh, LOCK_UN);
   close($fh);
