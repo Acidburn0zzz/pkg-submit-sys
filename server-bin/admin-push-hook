@@ -1,12 +1,8 @@
 #!/usr/bin/env perl
 
 # update ~/.ssh/authorized_keys
-
-# 'packagers' contains a list of ssh keys
-# for users allowed to push to repositories
-
-# 'core-group' can push to package repos as well as
-# merge the [testing] repository to the rest
+# and    ~/admin/groups
+# via the git tree's 'admins', 'users', 'groups' files
 
 use strict;
 use warnings;
