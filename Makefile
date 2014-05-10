@@ -23,4 +23,4 @@ user-bin/repo-send: user-bin/repo-send.in
 	    $*.in > $@
 
 clean:
-	rm user-bin/repo-send
+	rm -f user-bin/repo-send
