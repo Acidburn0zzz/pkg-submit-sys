@@ -63,12 +63,12 @@ sub add_user_entry($$$$) {
 ##
 # Handle a config line from the 'users' file
 #
-# add_core (out_handle, line)
+# add_users (out_handle, line)
 #
 sub add_users($$) {
   my ($fh, $line) = @_;
 
-  unless($line =~ m/^(\w+):([A-Za-z0-9_-]):\s*(.*)$/){
+  unless($line =~ m/^(\w+):([A-Za-z0-9_-]+):\s*(.*)$/){
     print STDERR "invalid line: $line\n";
     return;
   }
