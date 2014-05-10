@@ -13,9 +13,11 @@ use warnings;
 use Fcntl qw(:flock);
 
 my $HOME=$ENV{HOME};
-my $authfile="${HOME}/.ssh/authorized_keys";
 my $basefile="${HOME}/.ssh/admin_keys.pub";
+my $authfile="${HOME}/.ssh/authorized_keys";
 my $newfile="${authfile}.new";
+my $groupfile="${HOME}/admin/groups";
+my $newgroupfile="${groupfile}.new";
 
 my $ssh_access="no-port-forwarding,no-X11-forwarding,no-agent-forwarding,no-pty";
 
@@ -46,42 +48,55 @@ sub blob_for_file($) {
 }
 
 ##
-# Handle a config line for regular packagers
-# add_packager (out_handle, line)
+# Add a user entry to the authorized_keys file to call receive-command
+# with the user and their group as parameters.
 #
-sub add_packager($$) {
+# add_user_entry(out_handle, user, key, role)
+#
+sub add_user_entry($$$$) {
+  my ($fh, $user, $group, $key) = @_;
+
+  printf {$fh} "command=\"%s/bin/receive-command %s %s\",%s %s\n",
+    $HOME, $user, $group, $ssh_access, $key;
+}
+
+##
+# Handle a config line from the 'users' file
+#
+# add_core (out_handle, line)
+#
+sub add_users($$) {
   my ($fh, $line) = @_;
 
-  unless($line =~ m/^(\w+):\s*(.*)$/){
+  unless($line =~ m/^(\w+):([A-Za-z0-9_-]):\s*(.*)$/){
     print STDERR "invalid line: $line\n";
     return;
   }
 
-  my $user=$1;
-  my $key=$2;
-
-  printf {$fh} "command=\"%s/bin/receive-command %s\",%s %s\n",
-    $HOME, $user, $ssh_access, $key;
+  add_user_entry($fh, $1, $2, $3);
 }
 
 ##
-# Handle a config line from the 'core-group' file.
-# add_admin (out_handle, line)
+# A line in the 'admin' file is just an ssh key to be added without
+# modifcation.
 #
-sub add_core($$) {
-  my ($fh, $line) = @_;
-
-  return add_packager($fh, $line);
-}
-
-##
-# Handle a config line from the 'admin' file.
-# add_admin (out_handle, line)
+# add_admin (out_handle, key)
 #
 sub add_admin($$) {
-  my ($fh, $line) = @_;
+  my ($fh, $key) = @_;
 
-  print {$fh} "${line}\n";
+  print {$fh} "${key}\n";
+}
+
+##
+# The 'group' file can simply be cat-ed together...
+#
+# add_group (out_handle, line)
+#
+sub add_group($$) {
+  my ($fh, $entry) = @_;
+
+  print {$fh} "${entry}\n";
 }
 
 ##
@@ -124,22 +139,35 @@ sub build_authorized_keys($) {
   }
   close $in;
 
-  # process config files
+  # process ssh-related config files
   for_file_line($fh, 'admins',     \&add_admin);
-  for_file_line($fh, 'packagers',  \&add_packager);
-  for_file_line($fh, 'core-group', \&add_core);
+  for_file_line($fh, 'users',      \&add_users);
 }
 
 ##
 # Main function doing all the cool work!
 #
 sub main() {
-  open my $fh, '>', $newfile;
-  flock($fh, LOCK_EX);
+  # open and lock both the ssh and the group access file
+  open my $fh, '>', $newfile or mydie("failed to open new ssh key file");
+  flock($fh, LOCK_EX) or mydie("failed to lock new ssh key file");
+
+  open my $grpfh, '>', $newgroupfile or mydie("failed to open new group file");
+  flock($grpfh, LOCK_EX) or mydie("failed to lock new group file");
+
+  # ssh keys
   build_authorized_keys($fh);
+
+  # group declarations
+  for_file_line($grpfh, 'groups', \&add_group);
+
   rename($newfile, $authfile) or mydie("failed to replace authorization file");
+  rename($newgroupfile, $groupfile) or mydie("failed to replace group file");
+
   flock($fh, LOCK_UN);
+  flock($grpfh, LOCK_UN);
   close($fh);
+  close($grpfh);
 }
 
 main();

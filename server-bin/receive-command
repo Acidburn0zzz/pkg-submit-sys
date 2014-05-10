@@ -5,6 +5,63 @@ source "$HOME/lib/common.bash" || exit 1
 cmd="$SSH_ORIGINAL_COMMAND"
 
 user="$1"
+group="$2"
+# export these into the environment
+export ABSD_USER="$user" ABSD_GROUP="$group"
+
+# Load the user's access
+# As usual we're "forgiving" in our input and allow stuff to be separated and
+# surrounded by spaces, and commas to be repeated
+{
+  read commands
+  read repos
+  read archs
+} < <(awk -v "group=${group}" '
+function sanitize(arg) {
+  gsub("[, ]+",",",arg);
+  sub("^[, ]+","",arg);
+  sub("[, ]+$","",arg);
+  print arg;
+}
+{
+  split($0,part,":");
+  if (length(part) != 4)
+    next;
+  gsub(" ","",part[1]);
+  if (part[1] != group)
+    next;
+  sanitize(part[2]);
+  sanitize(part[3]);
+  sanitize(part[4]);
+  exit 0;
+}' < "$HOME/admin/groups")
+
+# Additionally, the 'ALL' keyword will simply replace the entire array:
+old_IFS="$IFS"
+IFS=','
+for i in ${repos[@]}; do
+  if [[ $i == ALL ]]; then
+    repos="ALL"
+    break
+  fi
+done
+for i in ${archs[@]}; do
+  if [[ $i == ALL ]]; then
+    archs="ALL"
+    break
+  fi
+done
+IFS="$old_IFS"
+
+### testing
+#echo "User is in group [$group] with access to:"
+#echo "  commands: [$commands]"
+#echo "  repos: [$repos]"
+#echo "  archs: [$archs]"
+#exit 0
+
+export ABSD_ALLOWED_REPOS="${repos}"
+export ABSD_ALLOWED_ARCHS="${archs}"
 
 if [[ -z $cmd ]]; then
   exec receive-package "$1"

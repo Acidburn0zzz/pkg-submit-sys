@@ -5,6 +5,16 @@ source "$HOME/admin/config" || die "failed to read configuration"
 
 user="$1"
 
+# ABSD_ALLOWED_REPOS/ARCHS are separated by commas and sanitized to
+# not contain any spaces, we set IFS=, and use [@] expansion
+#    WITHOUT QUOTES!!!
+# to turn it into an array we can easily iterate through
+old_ifs="$IFS"
+IFS=','
+allowed_repos=(${ABSD_ALLOWED_REPOS[@]})
+allowed_archs=(${ABSD_ALLOWED_ARCHS[@]})
+IFS="${old_ifs}"
+
 cleanup() {
   if [[ -n "$path" ]]; then
     rm -rf "$path"
@@ -70,11 +80,38 @@ repo_exists() {
   fi
 }
 
+# See if an array contains a value or the array is simply 'ALL'
+# $1: the value
+# ${2-}: the array
+contains_or_ALL() {
+  if [[ "$2" == ALL ]]; then
+    return 0
+  fi
+  local value="$1"
+  shift
+  for i in "$@"; do
+    if [[ $i == $value ]]; then
+      return 0
+    fi
+  done
+  false
+}
+
 check_access() {
   local repo="$1"
-  local pkgfile="$2"
-  # currently we don't have such fine access controls
-  :
+  local pkg="$2"
+  local arch="$3"
+
+  if ! contains_or_ALL "$repo" "${allowed_repos[@]}"; then
+    err 'you do not have access to repository %s' "${repo}"
+    return 1
+  fi
+
+  if ! contains_or_ALL "$arch" "${allowed_archs[@]}"; then
+    err 'you do not have access to architecture %s' "${arch}"
+    return 1
+  fi
+  true
 }
 
 push_package_to() {
@@ -153,6 +190,10 @@ push_package() {
   local verend="${pkg#${pkgname}-}"
   local pkgver="${verend%-${arch}*}"
 
+  if ! check_access "${repo}" "${pkgname}" "${arch}"; then
+    continue;
+  fi
+
   msg "package: %s version %s for architecture %s" "${pkgname}" "${pkgver}" "${arch}"
 
   # we use these args multiple times :P
@@ -181,9 +222,6 @@ for repo in *; do
 
   if pushd "${repo}" >/dev/null; then
     for pkg in *.pkg.tar.xz; do
-      if ! check_access "${repo}" "${pkg}"; then
-        continue;
-      fi
       push_package "${repo}" "${pkg}"
     done
     popd >/dev/null || bail "failed to enter previous directory"
