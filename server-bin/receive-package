@@ -194,24 +194,29 @@ push_package() {
 
   # we use these args multiple times :P
   local args=("${repo}" "${pkg}" "${pkgname}" "${pkgver}")
+  local worked=0
 
   # push to either the package's arch, or all of them on 'any'
   case "${arch}" in
     i686|x86_64)
       if check_access "${repo}" "${pkgname}" "${arch}"; then
         push_package_to "${arch}" "${args[@]}"
+        worked=1
       fi
       ;;
     any)
       for i in i686 x86_64; do
-        if check_access "${repo}" "${pkgname}" "${arch}"; then
+        if check_access "${repo}" "${pkgname}" "${i}"; then
           push_package_to "${i}" "${args[@]}"
+          worked=1
         fi
       done
       ;;
   esac
 
-  push_hook "${pkgname}" "${pkgver}" "${arch}" "${repo}"
+  if (( worked )); then
+    push_hook "${pkgname}" "${pkgver}" "${arch}" "${repo}"
+  fi
 }
 
 msg "Pushing packages..."
