@@ -190,10 +190,6 @@ push_package() {
   local verend="${pkg#${pkgname}-}"
   local pkgver="${verend%-${arch}*}"
 
-  if ! check_access "${repo}" "${pkgname}" "${arch}"; then
-    continue;
-  fi
-
   msg "package: %s version %s for architecture %s" "${pkgname}" "${pkgver}" "${arch}"
 
   # we use these args multiple times :P
@@ -202,11 +198,15 @@ push_package() {
   # push to either the package's arch, or all of them on 'any'
   case "${arch}" in
     i686|x86_64)
-      push_package_to "${arch}" "${args[@]}"
+      if check_access "${repo}" "${pkgname}" "${arch}"; then
+        push_package_to "${arch}" "${args[@]}"
+      fi
       ;;
     any)
       for i in i686 x86_64; do
-        push_package_to "${i}" "${args[@]}"
+        if check_access "${repo}" "${pkgname}" "${arch}"; then
+          push_package_to "${i}" "${args[@]}"
+        fi
       done
       ;;
   esac
