@@ -70,15 +70,20 @@ load_access_from_environment
 
 source "$HOME/lib/commands.bash" || die "failed to load command library"
 
+check_cmd_access() {
+  local cmd="$1"
+  if ! contains_or_ALL "$cmd" "${allowed_commands[@]}"; then
+    die "permission denied: %s" "$cmd"
+  fi
+}
+
 # remove PKG
 pkgregex='(([A-Za-z0-9_]|-+[A-Za-z_])+)'
 re="^remove $pkgregex\$"
 if [[ $cmd =~ $re ]]; then
   pkg="${BASH_REMATCH[1]}"
 
-  if ! contains_or_ALL remove_package "${allowed_commands[@]}"; then
-    die "permission denied: remove_package"
-  fi
+  check_cmd_access remove_package
 
   remove_package "$pkg" ALL
 fi
@@ -92,9 +97,7 @@ if [[ $cmd =~ $re ]]; then
     -e 's/[[:space:]]*$//' \
     -e 's/[[:space:]]+/ /')
 
-  if ! contains_or_ALL remove_package "${allowed_commands[@]}"; then
-    die "permission denied: remove_package"
-  fi
+  check_cmd_access remove_package
 
   remove_package "$pkg" ${archlist[@]}
 fi
