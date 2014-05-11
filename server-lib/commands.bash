@@ -33,6 +33,24 @@ remove_package() {
 # 1 package name and
 # 1 repository name
 # 1 architecture name
+remove_package_from_or_all() {
+  local pkg="$1"
+  local repo="$2"
+  local arch="$3"
+  if [[ $arch == ALL ]]; then
+    local repo_list_backup=("${repo_list[@]}")
+    repo_list=("$repo")
+    remove_package "$pkg" ALL
+    repo_list=("${repo_list_backup[@]}")
+  else
+    remove_package_from "$@"
+  fi
+}
+
+# The removal implementation taking exactl
+# 1 package name and
+# 1 repository name
+# 1 architecture name
 remove_package_from() {
   local pkg="$1"
   local repo="$2"

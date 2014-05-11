@@ -116,7 +116,7 @@ if [[ $cmd =~ $re ]]; then
   rc_other_archlist=()
   for ra in "${archlist[@]}"; do
     if [[ $ra =~ (.*):(.*) ]]; then
-      remove_package_from "$pkg" "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
+      remove_package_from_or_all "$pkg" "${BASH_REMATCH[1]}" "${BASH_REMATCH[2]}"
     else
       rc_other_archlist+=("$ra")
     fi
