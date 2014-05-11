@@ -48,7 +48,7 @@ remove_package_from() {
     return 1
   fi
 
-  if bsdtar -qtf "${repo}.db.tar.gz" "${pkg}-[0-9]*" >/dev/null; then
+  if bsdtar -qtf "${repo}.db.tar.gz" "${pkg}-[0-9]*" &>/dev/null; then
     log "removing package %s from %s/%s" "$pkg" "$repo" "$arch"
     if repo-remove "${repo}.db.tar.gz" "${pkg}"; then
       rm -v "${pkg}"-[0-9]*.pkg.tar.xz{,.sig}
