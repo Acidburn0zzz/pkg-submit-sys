@@ -88,20 +88,6 @@ if [[ $cmd =~ $re ]]; then
   remove_package "$pkg" ALL
 fi
 
-### remove PKG ARCH [ARCHn...]
-##re="^remove $pkgregex(([[:space:]]+[A-Za-z0-9_]+)+)\$"
-##if [[ $cmd =~ $re ]]; then
-##  pkg="${BASH_REMATCH[1]}"
-##  archlist=$(echo "${BASH_REMATCH[3]}" | sed -E \
-##    -e 's/^[[:space:]]*//' \
-##    -e 's/[[:space:]]*$//' \
-##    -e 's/[[:space:]]+/ /')
-##
-##  check_cmd_access remove_package
-##
-##  remove_package "$pkg" ${archlist[@]}
-##fi
-
 # remove PKG REPO:ARCH [[REPO:]ARCH]...
 re="^remove $pkgregex(([[:space:]]+([A-Za-z0-9_]+:)?[A-Za-z0-9_]+)+)\$"
 if [[ $cmd =~ $re ]]; then
