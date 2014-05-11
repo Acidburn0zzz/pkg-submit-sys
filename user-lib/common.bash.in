@@ -27,7 +27,9 @@ wrn() {
 
 # toctou but we don't want to 2>
 chk_source() {
-  [[ -r "$1" ]] && source "$1"
+  if [[ -r "$1" ]]; then
+    source "$1"
+  fi
 }
 
 chk_source "%%LIBDIR%%/absd-utils/repo-send.conf"
