@@ -8,6 +8,7 @@ user="$1"
 group="$2"
 # export these into the environment
 export ABSD_USER="$user" ABSD_GROUP="$group"
+export ABSD_USER_LOG_FILE="${HOME}/log/${user}.log"
 
 # Load the user's access
 # As usual we're "forgiving" in our input and allow stuff to be separated and
@@ -38,19 +39,16 @@ function sanitize(arg) {
 
 # Additionally, the 'ALL' keyword will simply replace the entire array:
 old_IFS="$IFS"
-IFS=','
-for i in ${repos[@]}; do
-  if [[ $i == ALL ]]; then
-    repos="ALL"
-    break
-  fi
-done
-for i in ${archs[@]}; do
-  if [[ $i == ALL ]]; then
-    archs="ALL"
-    break
-  fi
-done
+
+IFS=','; arr=(${commands[@]}); IFS="$old_IFS"
+contains_or_ALL ALL "${arr[@]}" && commands=ALL
+
+IFS=','; arr=(${repos[@]}); IFS="$old_IFS"
+contains_or_ALL ALL "${arr[@]}" && repos=ALL
+
+IFS=','; arr=(${archs[@]}); IFS="$old_IFS"
+contains_or_ALL ALL "${arr[@]}" && archs=ALL
+
 IFS="$old_IFS"
 
 ### testing
@@ -62,9 +60,41 @@ IFS="$old_IFS"
 
 export ABSD_ALLOWED_REPOS="${repos}"
 export ABSD_ALLOWED_ARCHS="${archs}"
-
+export ABSD_ALLOWED_COMMANDS="${commands}"
 if [[ -z $cmd ]]; then
+  log "access: packages from user %s"
   exec receive-package "$1"
 fi
 
-### TODO: implement additional commands/functionality
+load_access_from_environment
+
+source "$HOME/lib/commands.bash" || die "failed to load command library"
+
+# remove PKG
+pkgregex='(([A-Za-z0-9_]|-+[A-Za-z_])+)'
+re="^remove $pkgregex\$"
+if [[ $cmd =~ $re ]]; then
+  pkg="${BASH_REMATCH[1]}"
+
+  if ! contains_or_ALL remove_package "${allowed_commands[@]}"; then
+    die "permission denied: remove_package"
+  fi
+
+  remove_package "$pkg" ALL
+fi
+
+# remove PKG ARCH [ARCHn...]
+re="^remove $pkgregex(([[:space:]]+[A-Za-z0-9_]+)+)\$"
+if [[ $cmd =~ $re ]]; then
+  pkg="${BASH_REMATCH[1]}"
+  archlist=$(echo "${BASH_REMATCH[3]}" | sed -E \
+    -e 's/^[[:space:]]*//' \
+    -e 's/[[:space:]]*$//' \
+    -e 's/[[:space:]]+/ /')
+
+  if ! contains_or_ALL remove_package "${allowed_commands[@]}"; then
+    die "permission denied: remove_package"
+  fi
+
+  remove_package "$pkg" ${archlist[@]}
+fi
