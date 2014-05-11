@@ -49,7 +49,8 @@ remove_package_from() {
   fi
 
   log "removing package %s from %s/%s" "$pkg" "$repo" "$arch"
-  if repo-remove "${repo}.db.tar.gz" "${pkg}"; then
+  if echo repo-remove "${repo}.db.tar.gz" "${pkg}"; then
+    echo rm "${pkg}"-[0-9]*.pkg.tar.xz{,.sig}
     run_hook remove_package "$pkg" "$repo" "$arch"
   else
     wrn "failed to remove package %s from %s/%s" "$pkg" "$repo" "$arch"
