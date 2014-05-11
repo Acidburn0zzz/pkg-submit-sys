@@ -48,11 +48,13 @@ remove_package_from() {
     return 1
   fi
 
-  log "removing package %s from %s/%s" "$pkg" "$repo" "$arch"
-  if repo-remove "${repo}.db.tar.gz" "${pkg}"; then
-    rm -v "${pkg}"-[0-9]*.pkg.tar.xz{,.sig}
-    run_hook remove_package "$pkg" "$repo" "$arch"
-  else
-    wrn "failed to remove package %s from %s/%s" "$pkg" "$repo" "$arch"
+  if bsdtar -qtf "${repo}.db.tar.gz" "${pkg}-[0-9]*" >/dev/null; then
+    log "removing package %s from %s/%s" "$pkg" "$repo" "$arch"
+    if repo-remove "${repo}.db.tar.gz" "${pkg}"; then
+      rm -v "${pkg}"-[0-9]*.pkg.tar.xz{,.sig}
+      run_hook remove_package "$pkg" "$repo" "$arch"
+    else
+      wrn "failed to remove package %s from %s/%s" "$pkg" "$repo" "$arch"
+    fi
   fi
 }
