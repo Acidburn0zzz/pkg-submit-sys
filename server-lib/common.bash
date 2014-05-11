@@ -40,7 +40,7 @@ run_hook() {
   local hookname="$1"; shift
   eval "local hook=\${${hookname}_hook}"
   if [[ -n $hook ]]; then
-    $hook "$@" || wrn "${hookname} hook failed"
+    $hook "$ABSD_USER" "$@" || wrn "${hookname} hook failed"
   fi
 }
 

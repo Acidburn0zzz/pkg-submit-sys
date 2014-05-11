@@ -164,7 +164,7 @@ push_package() {
   esac
 
   if (( worked )); then
-    run_hook push "${user}" "${pkgname}" "${pkgver}" "${arch}" "${repo}"
+    run_hook push "${pkgname}" "${pkgver}" "${arch}" "${repo}"
   fi
 }
 
