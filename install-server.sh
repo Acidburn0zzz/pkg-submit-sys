@@ -108,10 +108,14 @@ config_home() {
   su - "${repo_user}" -c "cd ~/admin/admin.git && ../../bin/admin-push-hook 2>/dev/null"
 
   {
+    echo '# Automatically generated, do not change!'
+    echo '# Use the "config" file to overwrite these values!'
+    echo '#'
     grep '^repo_user=' config.sh
     grep '^repo_base=' config.sh
     grep '^push_hook=' config.sh
-  } > "${repo_home}/admin/config"
+    grep '^repo_list=' config.sh
+  } > "${repo_home}/admin/sys_config"
 }
 
 check_config
