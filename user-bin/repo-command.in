@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 
-source "%%LIBDIR%%/absd-utils/common.bash" || exit 1
+if ! source "%%LIBDIR%%/absd-utils/common.bash"; then
+  echo 'failed to load absd-utils library'
+  exit 1
+fi
 
 usage() {
   cat <<EOF

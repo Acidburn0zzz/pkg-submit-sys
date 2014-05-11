@@ -41,4 +41,4 @@ if [[ -f "$deprecated" ]]; then
   source "$deprecated"
 fi
 
-chk_source "$HOME/.config/absd-utils/repo-send.conf" 2>/dev/null
+chk_source "$HOME/.config/absd-utils/repo-send.conf"
