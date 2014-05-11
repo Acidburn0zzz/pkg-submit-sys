@@ -150,6 +150,7 @@ push_package() {
     i686|x86_64)
       if check_access "${repo}" "${arch}" "${pkgname}"; then
         push_package_to "${arch}" "${args[@]}"
+        log "pushed package %s to %s/%s" "$pkg" "$repo" "$arch"
         worked=1
       fi
       ;;
@@ -157,6 +158,7 @@ push_package() {
       for i in i686 x86_64; do
         if check_access "${repo}" "${i}" "${pkgname}"; then
           push_package_to "${i}" "${args[@]}"
+          log "pushed package %s to %s/%s" "$pkg" "$repo" "$i"
           worked=1
         fi
       done

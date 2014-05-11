@@ -27,7 +27,6 @@ wrn() {
 msg() {
   local mesg="$1"; shift
   printf " (remote) \033[1;32m***\033[0;0m ${mesg}\n" "$@"
-  log "msg: $mesg" "$@"
 }
 
 die() {
