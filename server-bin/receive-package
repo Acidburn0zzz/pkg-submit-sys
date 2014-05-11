@@ -128,12 +128,6 @@ push_package_to() {
   msg "finished with %s for architecture %s" "${pkgname}" "${arch}"
 }
 
-push_hook() {
-  if [[ -n "${push_hook}" ]]; then
-    ${push_hook} "${user}" "$@"
-  fi
-}
-
 push_package() {
   local repo="$1"
   local pkg="$2"
@@ -170,7 +164,7 @@ push_package() {
   esac
 
   if (( worked )); then
-    push_hook "${pkgname}" "${pkgver}" "${arch}" "${repo}"
+    run_hook push "${user}" "${pkgname}" "${pkgver}" "${arch}" "${repo}"
   fi
 }
 

@@ -35,6 +35,15 @@ die() {
   exit 1
 }
 
+# run a "hook" if it exists
+run_hook() {
+  local hookname="$1"; shift
+  eval "local hook=\${${hookname}_hook}"
+  if [[ -n $hook ]]; then
+    $hook "$@" || wrn "${hookname} hook failed"
+  fi
+}
+
 # See if an array contains a value or the array is simply 'ALL'
 # $1: the value
 # ${2-}: the array
