@@ -9,8 +9,8 @@ usage() {
   cat <<EOF
 usage: ${progname} <repository command>
 common commands:
-  remove <package>
-  remove <package> [<arch1> [<archN>...]]
+  remove PACKAGE
+  remove PACKAGE [[REPO:]ARCH]...
 EOF
 }
 
