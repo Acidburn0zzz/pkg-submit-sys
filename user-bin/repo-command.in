@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+source "%%LIBDIR%%/absd-utils/common.bash" || exit 1
+
+usage() {
+  cat <<EOF
+usage: ${progname} <repository command>
+common commands:
+  remove <package>
+  remove <package> [<arch1> [<archN>...]]
+EOF
+}
+
+if (( $# == 0 )); then
+  usage
+  exit 1
+fi
+
+exec ssh -i "${identity}" "${repo_user}@${repo_host}" "$@"
+
+# vim: set ts=2 sts=2 sw=2 et:
