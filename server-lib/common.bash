@@ -4,10 +4,11 @@ export ABSD_REPO_LOG_FILE="${HOME}/log/everything.log"
 
 log() {
   local mesg="$1"; shift
+  local now="$(date '+%Y-%m-%d %H:%M')"
   [[ -n $ABSD_REPO_LOG_FILE ]] && \
-    printf "%s: ${mesg}\n" "$ABSD_USER" "$@" >> "$ABSD_REPO_LOG_FILE"
+    printf "[%s] %s: ${mesg}\n" "$now" "$ABSD_USER" "$@" >> "$ABSD_REPO_LOG_FILE"
   [[ -n $ABSD_USER_LOG_FILE ]] && \
-    printf "%s: ${mesg}\n" "$ABSD_USER" "$@" >> "$ABSD_USER_LOG_FILE"
+    printf "[%s] %s: ${mesg}\n" "$now" "$ABSD_USER" "$@" >> "$ABSD_USER_LOG_FILE"
 }
 
 err() {
