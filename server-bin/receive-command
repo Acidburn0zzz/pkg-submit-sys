@@ -77,6 +77,14 @@ check_cmd_access() {
   fi
 }
 
+if [[ $cmd =~ ^report\ (.*)$ ]]; then
+  arch="${BASH_REMATCH[1]}"
+  # Run a repo report for this architecture
+  check_cmd_access  report
+  repo_report "${arch}"
+  exit 0
+fi
+
 # remove PKG
 pkgregex='(([A-Za-z0-9_]|-+[A-Za-z_])+)'
 re="^remove $pkgregex\$"
@@ -86,9 +94,10 @@ if [[ $cmd =~ $re ]]; then
   check_cmd_access remove_package
 
   remove_package "$pkg" ALL
+  exit 0
 fi
 
-# remove PKG REPO:ARCH [[REPO:]ARCH]...
+# remove PKG [REPO:]ARCH [[REPO:]ARCH]...
 re="^remove $pkgregex(([[:space:]]+([A-Za-z0-9_]+:)?[A-Za-z0-9_]+)+)\$"
 if [[ $cmd =~ $re ]]; then
   pkg="${BASH_REMATCH[1]}"
@@ -108,4 +117,5 @@ if [[ $cmd =~ $re ]]; then
     fi
   done
   remove_package "$pkg" "${rc_other_archlist[@]}"
+  exit 0
 fi

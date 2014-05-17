@@ -10,7 +10,8 @@ usage() {
 usage: ${progname} <repository command>
 common commands:
   remove PACKAGE
-  remove PACKAGE [[REPO:]ARCH]...
+  remove PACKAGE [[REPO:]ARCH]...             (ARCH can be ALL)
+  report [ARCH]                               (defaults to x86_64)
 EOF
 }
 

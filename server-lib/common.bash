@@ -43,6 +43,15 @@ run_hook() {
   fi
 }
 
+# run a locally configured command
+run_local_command() {
+  local name="$1"; shift
+  eval "local command=\${${name}_command}"
+  if [[ -n $command ]]; then
+    $command "$ABSD_USER" "$@" || wrn "${command} failed"
+  fi
+}
+
 # See if an array contains a value or the array is simply 'ALL'
 # $1: the value
 # ${2-}: the array
@@ -85,6 +94,23 @@ load_access_from_environment() {
   allowed_archs=(${ABSD_ALLOWED_ARCHS[@]})
   allowed_commands=(${ABSD_ALLOWED_COMMANDS[@]})
   IFS="${old_ifs}"
+}
+
+# Are we currently allowed to access repo/arch/pkg
+check_repo_access() {
+  local repo="$1"
+  local arch="$2"
+
+  if ! contains_or_ALL "$repo" "${allowed_repos[@]}"; then
+    err 'you do not have access to repository %s' "${repo}"
+    return 1
+  fi
+
+  if ! contains_or_ALL "$arch" "${allowed_archs[@]}"; then
+    err 'you do not have access to architecture %s' "${arch}"
+    return 1
+  fi
+  true
 }
 
 # Are we currently allowed to access repo/arch/pkg

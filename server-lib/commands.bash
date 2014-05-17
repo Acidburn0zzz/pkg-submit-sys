@@ -47,7 +47,7 @@ remove_package_from_or_all() {
   fi
 }
 
-# The removal implementation taking exactl
+# The removal implementation taking exactly
 # 1 package name and
 # 1 repository name
 # 1 architecture name
@@ -75,4 +75,10 @@ remove_package_from() {
       wrn "failed to remove package %s from %s/%s" "$pkg" "$repo" "$arch"
     fi
   fi
+}
+
+# Run a repo-report for an architecture
+repo_report() {
+  local arch="$1"
+  run_local_command repo_report "$arch"
 }
