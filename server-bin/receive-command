@@ -77,10 +77,18 @@ check_cmd_access() {
   fi
 }
 
+# the default report is for x86_64
+if [[ $cmd =~ ^report$ ]]; then
+  check_cmd_access report
+  repo_report x86_64
+  exit 0
+fi
+
+# report can take a repository as parameter too
 if [[ $cmd =~ ^report\ (.*)$ ]]; then
   arch="${BASH_REMATCH[1]}"
   # Run a repo report for this architecture
-  check_cmd_access  report
+  check_cmd_access report
   repo_report "${arch}"
   exit 0
 fi
