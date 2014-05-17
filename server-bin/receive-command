@@ -62,7 +62,7 @@ export ABSD_ALLOWED_REPOS="${repos}"
 export ABSD_ALLOWED_ARCHS="${archs}"
 export ABSD_ALLOWED_COMMANDS="${commands}"
 if [[ -z $cmd ]]; then
-  log "access: packages from user %s"
+  log "receiving packages from user %s"
   exec receive-package "$1"
 fi
 
