@@ -80,5 +80,6 @@ remove_package_from() {
 # Run a repo-report for an architecture
 repo_report() {
   local arch="$1"
+  log 'repo report of %s' "$arch"
   run_local_command repo_report "$arch"
 }
