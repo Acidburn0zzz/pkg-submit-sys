@@ -2,6 +2,11 @@
 
 source "$HOME/lib/common.bash" || exit 1
 
+if test -e "$HOME/repo-disabled"; then
+  msg "repository access is currently disabled"
+  exec cat "$HOME/repo-disabled"
+fi
+
 cmd="$SSH_ORIGINAL_COMMAND"
 
 user="$1"
