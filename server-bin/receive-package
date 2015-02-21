@@ -107,11 +107,24 @@ push_package_to() {
   fi
 
   # Add the package
-  if ! repo-add --remove --files "${repo}.db.tar.gz" "${file}"; then
+
+  # TODO: FIXME: XXX: repo-add doesn't yet have --remove on the server's jail
+  #                   jail needs to be upgraded first!
+  #if ! repo-add --remove --files "${repo}.db.tar.gz" "${file}"; then
+  if ! repo-add --files "${repo}.db.tar.gz" "${file}"; then
     err "Failed to add package to repository"
     popd > /dev/null || bail "Failed to go back to previous directory"
     return 1
   fi
+  # TODO: FIXME: XXX: repo-add doesn't yet have --remove on the server's jail
+  #                   jail needs to be upgraded first!
+  msg "Removing old files of package: ${pkgname}"
+  pushopt -s extglob nullglob
+  local i
+  for i in "./${pkgname}"${APLC_PKG_REST_EXTGLOB}; do
+    rm -vf "${i}" "${i}.sig"
+  done
+  popopt extglob nullglob
 
   popd > /dev/null || bail "Failed to go back to previous directory"
 
