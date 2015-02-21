@@ -121,7 +121,7 @@ push_package_to() {
   msg "Removing old files of package: ${pkgname}"
   pushopt -s extglob nullglob
   local i
-  for i in "./${pkgname}"${APLC_PKG_REST_EXTGLOB}; do
+  for i in "${pkgname}"${APLC_PKG_REST_EXTGLOB}; do
     [[ "${i}" != "${file}" ]] && rm -vf "${i}" "${i}.sig"
   done
   popopt extglob nullglob
