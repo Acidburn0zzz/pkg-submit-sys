@@ -21,6 +21,8 @@ install: $(USER_SCRIPTS)
 	install -dm755 $(DESTDIR)$(LIBDIR)/absd-utils
 	install -m644 etc/repo-send.conf $(DESTDIR)$(LIBDIR)/absd-utils/repo-send.conf
 	install -m644 user-lib/common.bash.sh $(DESTDIR)$(LIBDIR)/absd-utils/common.bash
+	install -dm755 $(DESTDIR)$(LIBDIR)/absd-utils/lib
+	install -m644 common-lib/absd-pkg-lib-common.bash $(DESTDIR)$(LIBDIR)/absd-utils/lib/absd-pkg-lib-common.bash
 
 .SUFFIXES:
 .SUFFIXES: .sh .in

@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "$HOME/lib/common.bash" || exit 1
+source "$HOME/lib/absd-pkg-lib-common.bash" || exit 1
 
 user="$1"
 
@@ -106,22 +107,11 @@ push_package_to() {
   fi
 
   # Add the package
-  if ! repo-add -f "${repo}.db.tar.gz" "${file}"; then
+  if ! repo-add --remove --files "${repo}.db.tar.gz" "${file}"; then
     err "Failed to add package to repository"
     popd > /dev/null || bail "Failed to go back to previous directory"
     return 1
   fi
-
-  # Remove older packages
-  for i in "${pkgname}"-*.pkg.tar.xz; do
-    case "$i" in
-      $file) : ;;
-      ${pkgname}-[0-9]*.pkg.tar.xz)
-        msg "Removing old version of %s" "${pkgname}"
-        rm -f "${i}" "${i}.sig"
-        ;;
-    esac
-  done
 
   popd > /dev/null || bail "Failed to go back to previous directory"
 
@@ -132,12 +122,10 @@ push_package() {
   local repo="$1"
   local pkg="$2"
 
-  local pkgname="${pkg%%-[0-9]*}"
-  local archend="${pkg##*-}"
-  local arch="${archend%%.*}"
-
-  local verend="${pkg#${pkgname}-}"
-  local pkgver="${verend%-${arch}*}"
+  aplc-split-pkg-filename "$pkg"
+  local pkgname="${APLC_pkgname}"
+  local arch="${APLC_pkgarch}"
+  local pkgver="${APLC_pkgver}-${APLC_pkgrel}"
 
   msg "package: %s version %s for architecture %s" "${pkgname}" "${pkgver}" "${arch}"
 

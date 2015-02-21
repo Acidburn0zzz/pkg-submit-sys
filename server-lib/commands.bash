@@ -66,15 +66,17 @@ remove_package_from() {
     return 1
   fi
 
-  if bsdtar -qtf "${repo}.db.tar.gz" "${pkg}-[0-9]*" &>/dev/null; then
-    log "removing package %s from %s/%s" "$pkg" "$repo" "$arch"
-    if repo-remove "${repo}.db.tar.gz" "${pkg}"; then
-      rm -v "${pkg}"-[0-9]*.pkg.tar.xz{,.sig}
-      run_hook remove_package "$pkg" "$repo" "$arch"
-    else
-      wrn "failed to remove package %s from %s/%s" "$pkg" "$repo" "$arch"
+  pushopt -s extglob nullglob
+  log "removing package %s from %s/%s" "$pkg" "$repo" "$arch"
+  if repo-remove -- "${repo}.db.tar.gz" "${pkg}" 2>/dev/null; then
+    if ! rm -v "${pkg}"${APLC_PKG_REST_EXTGLOB} 2>/dev/null; then
+      log "old files for package %s from %s/%s not found" "$pkg" "$repo" "$arch"
     fi
+    run_hook remove_package "$pkg" "$repo" "$arch"
+  else
+    wrn "failed to remove package %s from %s/%s" "$pkg" "$repo" "$arch"
   fi
+  popopt extglob nullglob
 }
 
 # Run a repo-report for an architecture

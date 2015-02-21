@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source %%LIBDIR%%/absd-utils/lib/absd-pkg-lib-common.bash
+
 usr_local_whitelist=(
   getopt
 )
@@ -27,10 +29,13 @@ check_usr_local() {
 
 for i in "$@"; do
   base="${i##*/}"
-  name="${base%%-[0-9]*}"
-  #ver="${base#${name}-}"
-  #ver="${ver%-[0-9]*}"
-  #ver="${ver%-*}"
+
+  if aplc-split-pkg-filename "$base"; then
+    name="${APLC_pkgname}"
+  else
+    bad_package "$i" "$(gettext 'bad filename')"
+    continue
+  fi
 
   rcd=0
   initd=0

@@ -75,6 +75,11 @@ copy_bin() {
     install -g "${repo_gid}" -m755 -o "${repo_uid}" "${i}" "${repo_home}/bin/" \
       || die "failed to copy scripts"
   done
+  for i in common-lib/*; do
+    submsg "${i#common-}"
+    install -g "${repo_gid}" -m755 -o "${repo_uid}" "${i}" "${repo_home}/lib/" \
+      || die "failed to copy scripts"
+  done
   for i in server-lib/*; do
     submsg "${i#server-}"
     install -g "${repo_gid}" -m755 -o "${repo_uid}" "${i}" "${repo_home}/lib/" \
