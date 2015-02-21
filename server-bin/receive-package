@@ -122,7 +122,7 @@ push_package_to() {
   pushopt -s extglob nullglob
   local i
   for i in "./${pkgname}"${APLC_PKG_REST_EXTGLOB}; do
-    rm -vf "${i}" "${i}.sig"
+    [[ "${i}" != "${file}" ]] && rm -vf "${i}" "${i}.sig"
   done
   popopt extglob nullglob
 
