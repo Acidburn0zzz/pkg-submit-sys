@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 source "$HOME/lib/common.bash" || exit 1
+source "$HOME/lib/absd-pkg-lib-common.bash" || exit 1
 
 if test -e "$HOME/repo-disabled"; then
   msg "repository access is currently disabled"
