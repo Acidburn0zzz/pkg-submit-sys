@@ -68,7 +68,7 @@ remove_package_from() {
 
   pushopt -s extglob nullglob
   log "removing package %s from %s/%s" "$pkg" "$repo" "$arch"
-  if repo-remove -- "${repo}.db.tar.gz" "${pkg}" 2>/dev/null; then
+  if repo-remove "${repo}.db.tar.gz" "${pkg}" 2>/dev/null; then
     if ! rm -v "${pkg}"${APLC_PKG_REST_EXTGLOB} 2>/dev/null; then
       log "old files for package %s from %s/%s not found" "$pkg" "$repo" "$arch"
     fi
